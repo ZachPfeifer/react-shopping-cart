@@ -1,14 +1,13 @@
-
 import React, { Component } from 'react';
 import Products from './components/Products';
 import Filter from './components/Filter';
-// import Basket from './components/Basket';
+import Basket from './components/Basket';
 
 import './App.css';
 
 class App extends Component {
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
     this.state = { size: '', sort: '', cartItems: [], products: [], filteredProducts: [] };
   }
   componentWillMount() {
@@ -25,9 +24,33 @@ class App extends Component {
       });
   }
 
+  handleRemoveFromCart = (e, product) => {
+    this.setState(state => {
+      const cartItems = state.cartItems.filter(a => a.id !== product.id);
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+      return { cartItems: cartItems };
+    })
+  }
 
+  handleAddToCart = (e, product) => {
+    this.setState(state => {
+      const cartItems = state.cartItems;
+      let productAlreadyInCart = false;
 
+      cartItems.forEach(cp => {
+        if (cp.id === product.id) {
+          cp.count += 1;
+          productAlreadyInCart = true;
+        }
+      });
 
+      if (!productAlreadyInCart) {
+        cartItems.push({ ...product, count: 1 });
+      }
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+      return { cartItems: cartItems };
+    });
+  }
 
   listProducts = () => {
     this.setState(state => {
@@ -67,7 +90,7 @@ class App extends Component {
             <Products products={this.state.filteredProducts} handleAddToCart={this.handleAddToCart} />
           </div>
           <div className="col-md-3">
-
+            <Basket cartItems={this.state.cartItems} handleRemoveFromCart={this.handleRemoveFromCart} />
           </div>
 
         </div>
